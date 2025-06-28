@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 @Mod(RequestingInterface.MOD_ID)
 public class RequestingInterface {
 
-    public static final String MOD_ID = "ri";
+    public static final String MOD_ID = "irequesting";
     public static final Logger LOGGER = LogUtils.getLogger();
 
     public RequestingInterface(IEventBus modEventBus) {

@@ -1,0 +1,88 @@
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+}
+
+base {
+    archivesName = "${mod_id}-${project.name}-${minecraft_version}"
+}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(java_version)
+    withSourcesJar()
+    withJavadocJar()
+}
+
+repositories {
+    mavenCentral()
+
+    exclusiveContent {
+        forRepositories(
+                maven {
+                    name = 'ParchmentMC'
+                    url = 'https://maven.parchmentmc.org/'
+                },
+                maven {
+                    name = "NeoForge"
+                    url = 'https://maven.neoforged.net/releases'
+                })
+        filter { includeGroup('org.parchmentmc.data') }
+    }
+
+    maven {
+        name = 'BlameJared'
+        url = 'https://maven.blamejared.com'
+    }
+}
+
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each { variant ->
+    configurations."$variant".outgoing {
+        capability("$group:${base.archivesName.get()}:$version")
+        capability("$group:$mod_id-${project.name}-${minecraft_version}:$version")
+        capability("$group:$mod_id:$version")
+    }
+    publishing.publications.configureEach {
+        suppressPomMetadataWarningsFor(variant)
+    }
+}
+
+processResources {
+    var expandProps = ['mod_version'                  : mod_version,
+                       'group'                        : mod_group_id,
+                       'minecraft_version'            : minecraft_version,
+                       'minecraft_version_range'      : minecraft_version_range,
+                       'fabric_version'               : fabric_version,
+                       'fabric_loader_version'        : fabric_loader_version,
+                       'mod_name'                     : mod_name,
+                       'mod_authors'                  : mod_authors,
+                       'mod_id'                       : mod_id,
+                       'mod_license'                  : mod_license,
+                       'mod_description'              : mod_description,
+                       'neoforge_version'             : neoforge_version,
+                       'neoforge_version_range'       : neoforge_version_range,
+                       'neoforge_loader_version_range': neoforge_loader_version_range,
+                       'jei_version'                   : jei_version,
+                       'jei_version_range'             : jei_version_range,
+                       'ae2_version'                   : ae2_version,
+                       'ae2_version_range'             : ae2_version_range,
+                       'java_version'                 : java_version]
+
+    filesMatching(['pack.mcmeta', 'fabric.mod.json', 'META-INF/neoforge.mods.toml', '*.mixins.json']) {
+        expand expandProps
+    }
+    inputs.properties(expandProps)
+}
+
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            artifactId base.archivesName.get()
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url System.getenv('local_maven_url')
+        }
+    }
+}

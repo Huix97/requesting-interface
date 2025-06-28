@@ -1,0 +1,40 @@
+plugins {
+    id 'multiloader-loader'
+    id 'net.neoforged.moddev'
+}
+
+dependencies {
+    //jei
+    compileOnly"mezz.jei:jei-${minecraft_version}-neoforge-api:${jei_version}"
+    runtimeOnly"mezz.jei:jei-${minecraft_version}-neoforge:${jei_version}"
+    //ae2
+    implementation "org.appliedenergistics:appliedenergistics2:${ae2_version}"
+}
+
+neoForge {
+    version = neoforge_version
+    parchment {
+        minecraftVersion = parchment_minecraft_version
+        mappingsVersion = parchment_mappings_version
+    }
+    runs {
+        configureEach {
+            systemProperty('neoforge.enabledGameTestNamespaces', mod_id)
+            ideName = "NeoForge ${it.name.capitalize()} (${project.path})" // Unify the run config names with fabric
+        }
+        client {
+            client()
+        }
+        data {
+            data()
+        }
+        server {
+            server()
+        }
+    }
+    mods {
+        "${mod_id}" {
+            sourceSet sourceSets.main
+        }
+    }
+}
